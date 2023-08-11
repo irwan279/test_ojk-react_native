@@ -1,102 +1,51 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { SafeAreaView, ScrollView, Text, Image, View } from 'react-native'
 
-import React from 'react';
-import type {Node} from 'react';
-import { NativeBaseProvider, Box } from "native-base";
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+export default function App() {
+  const [data, setData] = useState()
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
-
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const getData = async () => {
+    try {
+      const res = await axios.get('https://newsapi.org/v2/top-headlines', {
+        params: {
+          country: 'us',
+          category: 'business',
+          apiKey: 'ed72923f7cba4fc8a8f326fe0f91b88c'
+        },
+        // header
+      });
+      setData(res.data.articles)
+    } catch (error) {
+      alert(error.message)
+    }
   };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <ScrollView
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="langkah awal">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
+  useEffect(() => {
+    getData()
+  }, [])
 
-        </View>
+  return (
+    <SafeAreaView>
+      <ScrollView>
+        {data &&
+          data.map((item, i) => {
+            return (
+            <>
+              <View style={{ flexDirection: 'row', marginVertical: 10, marginHorizontal: 10 }}>
+                <Image 
+                style={{ width: 100, height: 100 }}  
+                source={{ uri: item.urlToImage }} 
+                />
+                <View style={{justifyContent:'space-between'}}>
+                <Text style={{marginHorizontal: 10, fontWeight:'bold'}}>{item.title}</Text>
+                <Text>{item.author}</Text>
+                </View>
+                </View>
+            </>
+            );
+          })}
       </ScrollView>
     </SafeAreaView>
-  );
-};
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-export default App;
+  )
+}
